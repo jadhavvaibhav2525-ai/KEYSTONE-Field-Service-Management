@@ -42,39 +42,58 @@ public class SecurityConfig {
             throws Exception {
 
         http
+
+                // =========================
                 // CORS
+                // =========================
                 .cors(cors -> cors.configurationSource(
                         corsConfigurationSource()
                 ))
 
+                // =========================
                 // CSRF
+                // =========================
                 .csrf(csrf -> csrf.disable())
 
-                // Stateless JWT authentication
+                // =========================
+                // STATELESS JWT
+                // =========================
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
                                 SessionCreationPolicy.STATELESS
                         )
                 )
 
-                // Authorization rules
+                // =========================
+                // AUTHORIZATION
+                // =========================
                 .authorizeHttpRequests(auth -> auth
 
                         // =========================
                         // PUBLIC ENDPOINTS
                         // =========================
+
+                        // Backend home / health check
                         .requestMatchers(
-        "/api/auth/login",
-        "/api/auth/register",
-        "/api/v1/auth/forgot-password",
-        "/api/v1/auth/verify-code",
-        "/api/v1/auth/reset-password",
-        "/error"
-).permitAll()
+                                "/",
+                                "/health"
+                        ).permitAll()
+
+                        // Authentication endpoints
+                        .requestMatchers(
+                                "/api/v1/auth/**",
+                                "/api/auth/**"
+                        ).permitAll()
+
+                        // Spring error endpoint
+                        .requestMatchers(
+                                "/error"
+                        ).permitAll()
 
                         // =========================
                         // USER MANAGEMENT
                         // =========================
+
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/users/**"
@@ -103,14 +122,11 @@ public class SecurityConfig {
                         // FACILITIES
                         // =========================
 
-                        // Customers can access their own facilities endpoint.
-                        // The controller derives the customer ID from the JWT user.
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/facilities/customer/me"
                         ).hasRole("CUSTOMER")
 
-                        // Staff facility access
                         .requestMatchers(
                                 "/api/facilities/**"
                         ).hasAnyRole(
@@ -123,8 +139,6 @@ public class SecurityConfig {
                         // EQUIPMENT
                         // =========================
 
-                        // Customers may request equipment for a facility.
-                        // EquipmentController verifies facility ownership.
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/equipment/facility/*"
@@ -136,7 +150,6 @@ public class SecurityConfig {
                                 "TECHNICIAN"
                         )
 
-                        // Other equipment endpoints remain staff-only.
                         .requestMatchers(
                                 "/api/equipment/**"
                         ).hasAnyRole(
@@ -149,6 +162,7 @@ public class SecurityConfig {
                         // =========================
                         // CUSTOMERS
                         // =========================
+
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/customers/**"
@@ -184,6 +198,7 @@ public class SecurityConfig {
                         // =========================
                         // SERVICE REQUESTS
                         // =========================
+
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/service-requests/technician/**"
@@ -257,13 +272,11 @@ public class SecurityConfig {
                         // WORK ORDERS
                         // =========================
 
-                        // Customers can access only their own work orders endpoint.
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/work-orders/customer/me"
                         ).hasRole("CUSTOMER")
 
-                        // Staff access to general and other work-order GET endpoints.
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/work-orders/**"
@@ -305,6 +318,7 @@ public class SecurityConfig {
                         // =========================
                         // SERVICE REPORTS
                         // =========================
+
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/service-reports/**"
@@ -347,6 +361,7 @@ public class SecurityConfig {
                         // =========================
                         // PARTS USAGE
                         // =========================
+
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/parts-usage/**"
@@ -390,6 +405,7 @@ public class SecurityConfig {
                         // =========================
                         // TIME TRACKING
                         // =========================
+
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/time-tracking/**"
@@ -433,15 +449,22 @@ public class SecurityConfig {
                         // =========================
                         // NOTIFICATIONS
                         // =========================
+
                         .requestMatchers(
                                 "/api/notifications/**"
                         ).authenticated()
 
-                        // All remaining endpoints require authentication
+                        // =========================
+                        // EVERYTHING ELSE
+                        // =========================
+
                         .anyRequest().authenticated()
                 )
 
-                // Add JWT filter
+                // =========================
+                // JWT FILTER
+                // =========================
+
                 .addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
@@ -453,13 +476,16 @@ public class SecurityConfig {
     // =========================
     // CORS CONFIGURATION
     // =========================
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowedOrigins(
-                List.of("http://localhost:5173")
+                List.of(
+                        "http://localhost:5173"
+                )
         );
 
         configuration.setAllowedMethods(
@@ -468,6 +494,7 @@ public class SecurityConfig {
                         "POST",
                         "PUT",
                         "DELETE",
+                        "PATCH",
                         "OPTIONS"
                 )
         );
