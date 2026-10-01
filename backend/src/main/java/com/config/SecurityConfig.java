@@ -75,9 +75,10 @@ public class SecurityConfig {
 
                         // Backend home / health check
                         .requestMatchers(
-                                "/",
-                                "/health"
-                        ).permitAll()
+        "/",
+        "/health",
+        "/api/v1/health"
+).permitAll()
 
                         // Authentication endpoints
                         .requestMatchers(
