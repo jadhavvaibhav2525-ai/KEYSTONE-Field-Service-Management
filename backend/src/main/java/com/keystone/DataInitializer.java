@@ -4,6 +4,7 @@ import com.keystone.backend.entity.Role;
 import com.keystone.backend.entity.User;
 import com.keystone.backend.repository.UserRepository;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,28 +16,42 @@ public class DataInitializer {
     @Bean
     CommandLineRunner initializeAdmin(
             UserRepository userRepository,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            @Value("${app.admin.email}") String adminEmail,
+            @Value("${app.admin.password:}") String adminPassword) {
 
         return args -> {
+            if (adminPassword.isBlank()) {
+                System.out.println(
+                        "Admin account was not initialized; set ADMIN_PASSWORD to enable bootstrap."
+                );
+                return;
+            }
 
             User admin = userRepository
-                    .findByEmail("admin@keystone.com")
+                    .findByEmail(adminEmail)
                     .orElse(null);
 
-            if (admin != null) {
-
-                admin.setPassword(
-                        passwordEncoder.encode("Admin@123")
+            if (admin == null) {
+                admin = new User(
+                        "System Administrator",
+                        adminEmail,
+                        passwordEncoder.encode(adminPassword)
                 );
-
-                admin.setRole(Role.ADMIN);
-
-                userRepository.save(admin);
-
-                System.out.println(
-                        "Admin account initialized successfully."
-                );
+            } else {
+                if (!passwordEncoder.matches(
+                        adminPassword,
+                        admin.getPassword()
+                )) {
+                    admin.setPassword(passwordEncoder.encode(adminPassword));
+                }
             }
+
+            if (admin.getRole() != Role.ADMIN) {
+                admin.setRole(Role.ADMIN);
+            }
+
+            userRepository.save(admin);
         };
     }
 }
