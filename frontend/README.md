@@ -1,5 +1,19 @@
 # React + TypeScript + Vite
 
+## Render deployment
+
+The repository root `render.yaml` configures a Render Static Site for this
+frontend. Create or update the Render Static Site from that Blueprint. Its
+build runs `npm ci && npm run build`, publishes `dist`, points API requests at
+the Keystone backend, and rewrites client-side routes to `index.html`.
+
+After Render assigns the frontend URL, set `FRONTEND_URL` on the backend
+service to that exact origin (for example, `https://keystone-frontend.onrender.com`)
+and redeploy the backend so its CORS policy allows the deployed frontend.
+
+For local development, the API defaults to `http://localhost:8082`. To use a
+different API origin, set `VITE_API_BASE_URL` before building the frontend.
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:

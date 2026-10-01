@@ -198,50 +198,6 @@ function ManagerDashboard() {
   ).length;
 
   // ==================================================
-  // STATUS AND PRIORITY STYLES
-  // ==================================================
-
-  const getStatusStyle = (status: string): React.CSSProperties => {
-    switch (status) {
-      case "PENDING":
-        return { backgroundColor: "#fff7ed", color: "#c2410c" };
-
-      case "ASSIGNED":
-        return { backgroundColor: "#eff6ff", color: "#1d4ed8" };
-
-      case "IN_PROGRESS":
-        return { backgroundColor: "#fefce8", color: "#a16207" };
-
-      case "COMPLETED":
-        return { backgroundColor: "#f0fdf4", color: "#15803d" };
-
-      default:
-        return { backgroundColor: "#f3f4f6", color: "#374151" };
-    }
-  };
-
-  const getPriorityStyle = (
-    priority: string
-  ): React.CSSProperties => {
-    switch (priority) {
-      case "URGENT":
-        return { backgroundColor: "#fee2e2", color: "#b91c1c" };
-
-      case "HIGH":
-        return { backgroundColor: "#ffedd5", color: "#c2410c" };
-
-      case "MEDIUM":
-        return { backgroundColor: "#fef9c3", color: "#a16207" };
-
-      case "LOW":
-        return { backgroundColor: "#dcfce7", color: "#15803d" };
-
-      default:
-        return { backgroundColor: "#f3f4f6", color: "#374151" };
-    }
-  };
-
-  // ==================================================
   // DATE FORMAT
   // ==================================================
 
