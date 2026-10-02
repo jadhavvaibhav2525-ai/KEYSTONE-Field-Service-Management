@@ -47,6 +47,10 @@ function AdminLayout({ children }: AdminLayoutProps) {
             Customers
           </Link>
 
+          <Link to="/admin/service-requests">
+            Service Requests
+          </Link>
+
           <Link to="/admin/work-orders">
             Work Orders
           </Link>
@@ -116,3 +120,4 @@ function AdminLayout({ children }: AdminLayoutProps) {
 }
 
 export default AdminLayout;
+

@@ -1,157 +1,193 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 
 import Login from "../pages/Login";
 import Dashboard from "../pages/Dashboard";
+
 import AdminDashboard from "../pages/AdminDashboard";
 import Users from "../pages/Users";
+import Customers from "../pages/Customers";
+import WorkOrders from "../pages/WorkOrders";
+import AdminServiceRequests from "../pages/AdminServiceRequests";
+import TechnicianDashboard from "../pages/TechnicianDashboard";
 import DispatcherDashboard from "../pages/DispatcherDashboard";
 import ManagerDashboard from "../pages/ManagerDashboard";
-import TechnicianDashboard from "../pages/TechnicianDashboard";
 import CustomerDashboard from "../pages/CustomerDashboard";
-import WorkOrders from "../pages/WorkOrders";
-import Customers from "../pages/Customers";
 import ServiceRequests from "../pages/ServiceRequests";
 import SLA from "../pages/SLA";
 
-import ProtectedRoute from "../components/ProtectedRoute";
+import AdminLayout from "../layouts/AdminLayout";
 
 function AppRoutes() {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* DEFAULT */}
-        <Route
-          path="/"
-          element={<Navigate to="/login" replace />}
-        />
+    <Routes>
 
-        {/* LOGIN */}
-        <Route
-          path="/login"
-          element={<Login />}
-        />
+      {/* =====================================================
+          PUBLIC ROUTES
+      ===================================================== */}
 
-        {/* GENERAL DASHBOARD */}
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute allowedRoles={["ADMIN", "DISPATCHER", "MANAGER", "TECHNICIAN", "CUSTOMER"]}>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
+      <Route path="/login" element={<Login />} />
 
-        {/* ADMIN */}
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute allowedRoles={["ADMIN"]}>
-              <AdminDashboard />
-            </ProtectedRoute>
-          }
-        />
 
-        {/* Admin - Users */}
-        <Route
-          path="/admin/users"
-          element={
-            <ProtectedRoute allowedRoles={["ADMIN"]}>
-              <Users />
-            </ProtectedRoute>
-          }
-        />
+      {/* =====================================================
+          DEFAULT / DASHBOARD
+      ===================================================== */}
 
-        {/* Admin - Work Orders */}
-        <Route
-          path="/admin/work-orders"
-          element={
-            <ProtectedRoute allowedRoles={["ADMIN"]}>
-              <WorkOrders />
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path="/"
+        element={<Navigate to="/login" replace />}
+      />
 
-        {/* Admin / Dispatcher / Manager - Customers */}
-        <Route
-          path="/admin/customers"
-          element={
-            <ProtectedRoute
-              allowedRoles={["ADMIN", "DISPATCHER", "MANAGER"]}
-            >
-              <Customers />
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path="/dashboard"
+        element={<Dashboard />}
+      />
 
-        {/* SLA Management - Admin / Dispatcher / Manager */}
-        <Route
-          path="/sla"
-          element={
-            <ProtectedRoute
-              allowedRoles={["ADMIN", "DISPATCHER", "MANAGER"]}
-            >
-              <SLA />
-            </ProtectedRoute>
-          }
-        />
 
-        {/* DISPATCHER */}
-        <Route
-          path="/dispatcher"
-          element={
-            <ProtectedRoute allowedRoles={["DISPATCHER"]}>
-              <DispatcherDashboard />
-            </ProtectedRoute>
-          }
-        />
+      {/* =====================================================
+          ADMIN ROUTES
+      ===================================================== */}
 
-        {/* MANAGER */}
-        <Route
-          path="/manager"
-          element={
-            <ProtectedRoute allowedRoles={["MANAGER"]}>
-              <ManagerDashboard />
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path="/admin"
+        element={
+          <AdminLayout>
+            <AdminDashboard />
+          </AdminLayout>
+        }
+      />
 
-        {/* TECHNICIAN */}
-        <Route
-          path="/technician"
-          element={
-            <ProtectedRoute allowedRoles={["TECHNICIAN"]}>
-              <TechnicianDashboard />
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path="/admin/users"
+        element={
+          <AdminLayout>
+            <Users />
+          </AdminLayout>
+        }
+      />
 
-        {/* CUSTOMER */}
-        <Route
-          path="/customer"
-          element={
-            <ProtectedRoute allowedRoles={["CUSTOMER"]}>
-              <CustomerDashboard />
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path="/admin/customers"
+        element={
+          <AdminLayout>
+            <Customers />
+          </AdminLayout>
+        }
+      />
 
-        {/* Customer - Service Requests */}
-        <Route
-          path="/customer/service-requests"
-          element={
-            <ProtectedRoute allowedRoles={["CUSTOMER"]}>
-              <ServiceRequests />
-            </ProtectedRoute>
-          }
-        />
+      {/* ADMIN SERVICE REQUESTS */}
 
-        {/* FALLBACK */}
-        <Route
-          path="*"
-          element={<Navigate to="/login" replace />}
-        />
-      </Routes>
-    </BrowserRouter>
+      <Route
+        path="/admin/service-requests"
+        element={
+          <AdminLayout>
+            <AdminServiceRequests />
+          </AdminLayout>
+        }
+      />
+
+      {/* ADMIN WORK ORDERS */}
+
+      <Route
+        path="/admin/work-orders"
+        element={
+          <AdminLayout>
+            <WorkOrders />
+          </AdminLayout>
+        }
+      />
+
+      {/* ADMIN TECHNICIANS */}
+
+      <Route
+        path="/admin/technicians"
+        element={
+          <AdminLayout>
+            <TechnicianDashboard />
+          </AdminLayout>
+        }
+      />
+
+      {/* ADMIN REPORTS */}
+
+      <Route
+        path="/admin/reports"
+        element={
+          <AdminLayout>
+            <SLA />
+          </AdminLayout>
+        }
+      />
+
+      {/* ADMIN SETTINGS */}
+
+      <Route
+        path="/admin/settings"
+        element={
+          <AdminLayout>
+            <div>
+              <h2>Settings</h2>
+              <p>Admin settings page.</p>
+            </div>
+          </AdminLayout>
+        }
+      />
+
+
+      {/* =====================================================
+          DISPATCHER ROUTE
+      ===================================================== */}
+
+      <Route
+        path="/dispatcher"
+        element={<DispatcherDashboard />}
+      />
+
+
+      {/* =====================================================
+          MANAGER ROUTE
+      ===================================================== */}
+
+      <Route
+        path="/manager"
+        element={<ManagerDashboard />}
+      />
+
+
+      {/* =====================================================
+          TECHNICIAN ROUTE
+      ===================================================== */}
+
+      <Route
+        path="/technician"
+        element={<TechnicianDashboard />}
+      />
+
+
+      {/* =====================================================
+          CUSTOMER ROUTES
+      ===================================================== */}
+
+      <Route
+        path="/customer"
+        element={<CustomerDashboard />}
+      />
+
+      <Route
+        path="/customer/service-requests"
+        element={<ServiceRequests />}
+      />
+
+
+      {/* =====================================================
+          FALLBACK
+      ===================================================== */}
+
+      <Route
+        path="*"
+        element={<Navigate to="/login" replace />}
+      />
+
+    </Routes>
   );
 }
 

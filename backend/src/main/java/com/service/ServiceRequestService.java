@@ -12,7 +12,6 @@ import java.util.List;
 public class ServiceRequestService {
 
     private final ServiceRequestRepository serviceRequestRepository;
-
     private final WorkOrderService workOrderService;
 
     public ServiceRequestService(
@@ -26,15 +25,20 @@ public class ServiceRequestService {
                 workOrderService;
     }
 
-    // Get all service requests
+    // =========================================================
+    // GET ALL SERVICE REQUESTS
+    // =========================================================
+
     public List<ServiceRequest> getAllServiceRequests() {
 
         return serviceRequestRepository.findAll();
     }
 
-    // Get service request by ID
-    public ServiceRequest getServiceRequestById(
-            Long id) {
+    // =========================================================
+    // GET SERVICE REQUEST BY ID
+    // =========================================================
+
+    public ServiceRequest getServiceRequestById(Long id) {
 
         return serviceRequestRepository.findById(id)
                 .orElseThrow(() ->
@@ -44,7 +48,10 @@ public class ServiceRequestService {
                 );
     }
 
-    // Get service requests of a customer
+    // =========================================================
+    // GET SERVICE REQUESTS BY CUSTOMER
+    // =========================================================
+
     public List<ServiceRequest> getServiceRequestsByCustomer(
             Long customerId) {
 
@@ -52,7 +59,10 @@ public class ServiceRequestService {
                 .findByCustomerId(customerId);
     }
 
-    // Get service requests assigned to a technician
+    // =========================================================
+    // GET SERVICE REQUESTS BY TECHNICIAN
+    // =========================================================
+
     public List<ServiceRequest> getServiceRequestsByTechnician(
             Long technicianId) {
 
@@ -60,7 +70,10 @@ public class ServiceRequestService {
                 .findByTechnicianId(technicianId);
     }
 
-    // Get service requests by status
+    // =========================================================
+    // GET SERVICE REQUESTS BY STATUS
+    // =========================================================
+
     public List<ServiceRequest> getServiceRequestsByStatus(
             ServiceRequestStatus status) {
 
@@ -68,19 +81,17 @@ public class ServiceRequestService {
                 .findByStatus(status);
     }
 
-    // Create service request
+    // =========================================================
+    // CREATE SERVICE REQUEST
+    // =========================================================
+
     public ServiceRequest createServiceRequest(
             ServiceRequest serviceRequest) {
 
-        // Set default status
-        if (serviceRequest.getStatus() == null) {
-
-            serviceRequest.setStatus(
-                    ServiceRequestStatus.NEW
-            );
-        }
-
-        // Set default priority
+        /*
+         * Set default priority if the customer
+         * does not provide one.
+         */
         if (serviceRequest.getPriority() == null) {
 
             serviceRequest.setPriority(
@@ -90,7 +101,29 @@ public class ServiceRequestService {
         }
 
         /*
-         * First save the Service Request.
+         * If there is no facility assigned,
+         * keep the request pending until Admin
+         * assigns a facility.
+         */
+        if (serviceRequest.getFacilityId() == null) {
+
+            serviceRequest.setStatus(
+                    ServiceRequestStatus.PENDING_FACILITY
+            );
+
+        } else if (serviceRequest.getStatus() == null) {
+
+            /*
+             * If a facility already exists,
+             * the request can enter the normal workflow.
+             */
+            serviceRequest.setStatus(
+                    ServiceRequestStatus.NEW
+            );
+        }
+
+        /*
+         * Save the service request first.
          */
         ServiceRequest savedRequest =
                 serviceRequestRepository.save(
@@ -98,21 +131,34 @@ public class ServiceRequestService {
                 );
 
         /*
-         * Automatically create a Work Order
-         * from the new Service Request.
+         * Only create a Work Order when
+         * a facility exists.
+         *
+         * This prevents a request without
+         * a facility from entering the
+         * dispatcher/technician workflow.
          */
-        workOrderService.createFromServiceRequest(
-                savedRequest
-        );
+        if (savedRequest.getFacilityId() != null) {
+
+            workOrderService.createFromServiceRequest(
+                    savedRequest
+            );
+        }
 
         return savedRequest;
     }
 
-    // Update service request
+    // =========================================================
+    // UPDATE SERVICE REQUEST
+    // =========================================================
+
     public ServiceRequest updateServiceRequest(
             Long id,
             ServiceRequest updatedRequest) {
 
+        /*
+         * Find the existing service request.
+         */
         ServiceRequest existingRequest =
                 serviceRequestRepository.findById(id)
                         .orElseThrow(() ->
@@ -121,6 +167,17 @@ public class ServiceRequestService {
                                 )
                         );
 
+        /*
+         * Remember whether this request was
+         * waiting for a facility.
+         */
+        boolean wasPendingFacility =
+                existingRequest.getStatus()
+                        == ServiceRequestStatus.PENDING_FACILITY;
+
+        /*
+         * Update customer information.
+         */
         existingRequest.setCustomerId(
                 updatedRequest.getCustomerId()
         );
@@ -133,6 +190,9 @@ public class ServiceRequestService {
                 updatedRequest.getCustomerEmail()
         );
 
+        /*
+         * Update facility and equipment.
+         */
         existingRequest.setFacilityId(
                 updatedRequest.getFacilityId()
         );
@@ -141,6 +201,9 @@ public class ServiceRequestService {
                 updatedRequest.getEquipmentId()
         );
 
+        /*
+         * Update problem and priority.
+         */
         existingRequest.setProblemDescription(
                 updatedRequest.getProblemDescription()
         );
@@ -149,16 +212,60 @@ public class ServiceRequestService {
                 updatedRequest.getPriority()
         );
 
-        existingRequest.setStatus(
-                updatedRequest.getStatus()
-        );
+        /*
+         * If this request was waiting for a facility
+         * and Admin has now assigned a facility,
+         * move it into the normal NEW state.
+         */
+        if (wasPendingFacility
+                && updatedRequest.getFacilityId() != null) {
 
-        return serviceRequestRepository.save(
-                existingRequest
-        );
+            existingRequest.setStatus(
+                    ServiceRequestStatus.NEW
+            );
+
+        } else if (updatedRequest.getStatus() != null) {
+
+            /*
+             * For all other updates, preserve the
+             * status supplied by the caller.
+             */
+            existingRequest.setStatus(
+                    updatedRequest.getStatus()
+            );
+        }
+
+        /*
+         * Save the updated service request.
+         */
+        ServiceRequest savedRequest =
+                serviceRequestRepository.save(
+                        existingRequest
+                );
+
+        /*
+         * If this request was previously waiting
+         * for a facility and now has one,
+         * automatically create its Work Order.
+         *
+         * WorkOrderService already prevents duplicate
+         * Work Orders for the same Service Request.
+         */
+        if (wasPendingFacility
+                && savedRequest.getFacilityId() != null) {
+
+            workOrderService.createFromServiceRequest(
+                    savedRequest
+            );
+        }
+
+        return savedRequest;
     }
 
-    // Update status
+    // =========================================================
+    // UPDATE SERVICE REQUEST STATUS
+    // =========================================================
+
     public ServiceRequest updateServiceRequestStatus(
             Long id,
             ServiceRequestStatus status) {
@@ -178,7 +285,10 @@ public class ServiceRequestService {
         );
     }
 
-    // Delete service request
+    // =========================================================
+    // DELETE SERVICE REQUEST
+    // =========================================================
+
     public void deleteServiceRequest(Long id) {
 
         if (!serviceRequestRepository.existsById(id)) {

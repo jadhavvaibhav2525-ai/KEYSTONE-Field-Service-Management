@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import AdminLayout from "../layouts/AdminLayout";
 import api from "../api/axios";
 
 interface WorkOrder {
@@ -294,7 +293,6 @@ function WorkOrders() {
       );
     }
   );
-
   // Summary counts
   const pendingCount = workOrders.filter(
     (order) => order.status === "PENDING"
@@ -317,7 +315,7 @@ function WorkOrders() {
   ).length;
 
   return (
-    <AdminLayout>
+    <div>
       {/* Header */}
       <div
         style={{
@@ -932,7 +930,7 @@ function WorkOrders() {
           )}
         </div>
       )}
-    </AdminLayout>
+    </div>
   );
 }
 
@@ -957,6 +955,7 @@ function SummaryCard({
         {value}
       </p>
     </div>
+    
   );
 }
 
@@ -1034,3 +1033,5 @@ const deleteButtonStyle: React.CSSProperties = {
 };
 
 export default WorkOrders;
+
+
