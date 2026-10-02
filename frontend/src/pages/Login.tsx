@@ -2,18 +2,32 @@ import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
 
-type RecoveryStep = "login" | "email" | "verify" | "reset";
+type RecoveryStep =
+  | "login"
+  | "register"
+  | "email"
+  | "verify"
+  | "reset";
 
 function Login() {
   const navigate = useNavigate();
 
   const [step, setStep] = useState<RecoveryStep>("login");
 
+  // Login / recovery
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
+  // Customer registration
+  const [registerName, setRegisterName] = useState("");
+  const [registerEmail, setRegisterEmail] = useState("");
+  const [registerPhone, setRegisterPhone] = useState("");
+  const [registerPassword, setRegisterPassword] = useState("");
+  const [registerConfirmPassword, setRegisterConfirmPassword] =
+    useState("");
 
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
@@ -62,6 +76,70 @@ function Login() {
       }
     } catch {
       setError("Invalid email or password.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // NEW CUSTOMER REGISTRATION
+  const handleRegister = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    setError("");
+    setMessage("");
+
+    if (registerName.trim().length < 2) {
+      setError("Please enter your full name.");
+      return;
+    }
+
+    if (registerPassword.length < 8) {
+      setError("Password must contain at least 8 characters.");
+      return;
+    }
+
+    if (registerPassword !== registerConfirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await api.post("/api/auth/register", {
+        name: registerName.trim(),
+        email: registerEmail.trim(),
+        phone: registerPhone.trim(),
+        password: registerPassword,
+      });
+
+      setMessage(
+        "Customer account created successfully. Please login with your email and password."
+      );
+
+      // Put registered email into login form
+      setEmail(registerEmail.trim());
+
+      // Clear registration fields
+      setRegisterName("");
+      setRegisterEmail("");
+      setRegisterPhone("");
+      setRegisterPassword("");
+      setRegisterConfirmPassword("");
+
+      // Return to login
+      setStep("login");
+    } catch (err: any) {
+      const backendMessage =
+        err.response?.data?.message ||
+        err.response?.data ||
+        "Unable to create account. Please try again.";
+
+      setError(
+        typeof backendMessage === "string"
+          ? backendMessage
+          : "Unable to create account. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -172,6 +250,12 @@ function Login() {
     setConfirmPassword("");
   };
 
+  const openRegistration = () => {
+    setStep("register");
+    setError("");
+    setMessage("");
+  };
+
   return (
     <div className="login-page">
       <div className="login-container">
@@ -181,10 +265,12 @@ function Login() {
           Field Service Management Platform
         </p>
 
+        {/* LOGIN */}
         {step === "login" && (
           <form onSubmit={handleLogin}>
             <div className="form-group">
               <label htmlFor="login-email">Email</label>
+
               <input
                 type="email"
                 id="login-email"
@@ -198,6 +284,7 @@ function Login() {
 
             <div className="form-group">
               <label htmlFor="login-password">Password</label>
+
               <input
                 type="password"
                 id="login-password"
@@ -210,13 +297,25 @@ function Login() {
             </div>
 
             {error && (
-              <p role="alert" style={{ color: "red", marginBottom: "15px" }}>
+              <p
+                role="alert"
+                style={{
+                  color: "red",
+                  marginBottom: "15px",
+                }}
+              >
                 {error}
               </p>
             )}
 
             {message && (
-              <p role="status" style={{ color: "green", marginBottom: "15px" }}>
+              <p
+                role="status"
+                style={{
+                  color: "green",
+                  marginBottom: "15px",
+                }}
+              >
                 {message}
               </p>
             )}
@@ -229,6 +328,7 @@ function Login() {
               {loading ? "LOGGING IN..." : "LOGIN"}
             </button>
 
+            {/* FORGOT PASSWORD */}
             <button
               type="button"
               className="forgot-password"
@@ -247,9 +347,171 @@ function Login() {
             >
               Forgot Password?
             </button>
+
+            {/* CUSTOMER REGISTRATION */}
+            <div
+              style={{
+                marginTop: "25px",
+                paddingTop: "20px",
+                borderTop: "1px solid #ddd",
+                textAlign: "center",
+              }}
+            >
+              <p
+                style={{
+                  marginBottom: "8px",
+                  color: "#555",
+                }}
+              >
+                New to KEYSTONE?
+              </p>
+
+              <button
+                type="button"
+                onClick={openRegistration}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "#0d6efd",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                  fontSize: "15px",
+                }}
+              >
+                Create Customer Account
+              </button>
+            </div>
           </form>
         )}
 
+        {/* CUSTOMER REGISTRATION */}
+        {step === "register" && (
+          <form onSubmit={handleRegister}>
+            <h2>Create Customer Account</h2>
+
+            <p
+              style={{
+                color: "#666",
+                marginBottom: "20px",
+              }}
+            >
+              Create your KEYSTONE customer account to manage your
+              service requests and work orders.
+            </p>
+
+            <div className="form-group">
+              <label htmlFor="register-name">Full Name</label>
+
+              <input
+                type="text"
+                id="register-name"
+                placeholder="Enter your full name"
+                value={registerName}
+                onChange={(e) => setRegisterName(e.target.value)}
+                autoComplete="name"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="register-email">Email</label>
+
+              <input
+                type="email"
+                id="register-email"
+                placeholder="Enter your email"
+                value={registerEmail}
+                onChange={(e) => setRegisterEmail(e.target.value)}
+                autoComplete="email"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="register-phone">Phone Number</label>
+
+              <input
+                type="tel"
+                id="register-phone"
+                placeholder="Enter your phone number"
+                value={registerPhone}
+                onChange={(e) => setRegisterPhone(e.target.value)}
+                autoComplete="tel"
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="register-password">Password</label>
+
+              <input
+                type="password"
+                id="register-password"
+                placeholder="Minimum 8 characters"
+                value={registerPassword}
+                onChange={(e) => setRegisterPassword(e.target.value)}
+                autoComplete="new-password"
+                minLength={8}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="register-confirm-password">
+                Confirm Password
+              </label>
+
+              <input
+                type="password"
+                id="register-confirm-password"
+                placeholder="Re-enter your password"
+                value={registerConfirmPassword}
+                onChange={(e) =>
+                  setRegisterConfirmPassword(e.target.value)
+                }
+                autoComplete="new-password"
+                minLength={8}
+                required
+              />
+            </div>
+
+            {error && (
+              <p
+                role="alert"
+                style={{
+                  color: "red",
+                  marginBottom: "15px",
+                }}
+              >
+                {error}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              className="login-button"
+              disabled={loading}
+            >
+              {loading ? "CREATING ACCOUNT..." : "CREATE ACCOUNT"}
+            </button>
+
+            <button
+              type="button"
+              className="forgot-password"
+              onClick={returnToLogin}
+              style={{
+                display: "block",
+                margin: "15px auto 0",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+              }}
+            >
+              Already have an account? Back to Login
+            </button>
+          </form>
+        )}
+
+        {/* FORGOT PASSWORD - EMAIL */}
         {step === "email" && (
           <form onSubmit={handleRequestCode}>
             <h2>Forgot Password</h2>
@@ -260,7 +522,10 @@ function Login() {
             </p>
 
             <div className="form-group">
-              <label htmlFor="recovery-email">Registered Email</label>
+              <label htmlFor="recovery-email">
+                Registered Email
+              </label>
+
               <input
                 type="email"
                 id="recovery-email"
@@ -273,7 +538,13 @@ function Login() {
             </div>
 
             {error && (
-              <p role="alert" style={{ color: "red", marginBottom: "15px" }}>
+              <p
+                role="alert"
+                style={{
+                  color: "red",
+                  marginBottom: "15px",
+                }}
+              >
                 {error}
               </p>
             )}
@@ -303,24 +574,31 @@ function Login() {
           </form>
         )}
 
+        {/* VERIFY CODE */}
         {step === "verify" && (
           <form onSubmit={handleVerifyCode}>
             <h2>Verify Passcode</h2>
 
             <p>
-              Enter the 6-digit passcode sent to <strong>{email}</strong>.
-              The passcode expires after 10 minutes.
+              Enter the 6-digit passcode sent to{" "}
+              <strong>{email}</strong>. The passcode expires after
+              10 minutes.
             </p>
 
             <div className="form-group">
-              <label htmlFor="reset-code">6-Digit Passcode</label>
+              <label htmlFor="reset-code">
+                6-Digit Passcode
+              </label>
+
               <input
                 type="text"
                 id="reset-code"
                 placeholder="Enter passcode"
                 value={code}
                 onChange={(e) =>
-                  setCode(e.target.value.replace(/\D/g, "").slice(0, 6))
+                  setCode(
+                    e.target.value.replace(/\D/g, "").slice(0, 6)
+                  )
                 }
                 inputMode="numeric"
                 autoComplete="one-time-code"
@@ -331,13 +609,25 @@ function Login() {
             </div>
 
             {message && (
-              <p role="status" style={{ color: "green", marginBottom: "15px" }}>
+              <p
+                role="status"
+                style={{
+                  color: "green",
+                  marginBottom: "15px",
+                }}
+              >
                 {message}
               </p>
             )}
 
             {error && (
-              <p role="alert" style={{ color: "red", marginBottom: "15px" }}>
+              <p
+                role="alert"
+                style={{
+                  color: "red",
+                  marginBottom: "15px",
+                }}
+              >
                 {error}
               </p>
             )}
@@ -372,6 +662,7 @@ function Login() {
           </form>
         )}
 
+        {/* RESET PASSWORD */}
         {step === "reset" && (
           <form onSubmit={handleResetPassword}>
             <h2>Set New Password</h2>
@@ -380,6 +671,7 @@ function Login() {
 
             <div className="form-group">
               <label htmlFor="new-password">New Password</label>
+
               <input
                 type="password"
                 id="new-password"
@@ -393,13 +685,18 @@ function Login() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="confirm-password">Confirm New Password</label>
+              <label htmlFor="confirm-password">
+                Confirm New Password
+              </label>
+
               <input
                 type="password"
                 id="confirm-password"
                 placeholder="Re-enter new password"
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                onChange={(e) =>
+                  setConfirmPassword(e.target.value)
+                }
                 autoComplete="new-password"
                 minLength={8}
                 required
@@ -407,7 +704,13 @@ function Login() {
             </div>
 
             {error && (
-              <p role="alert" style={{ color: "red", marginBottom: "15px" }}>
+              <p
+                role="alert"
+                style={{
+                  color: "red",
+                  marginBottom: "15px",
+                }}
+              >
                 {error}
               </p>
             )}

@@ -158,11 +158,20 @@ function TechnicianDashboard() {
   }, [user?.id]);
 
   useEffect(() => {
-    if (user?.id) {
-      fetchWorkOrders();
-      fetchServiceRequests();
-    }
-  }, [user?.id, fetchWorkOrders, fetchServiceRequests]);
+  if (!user?.id) return;
+
+  void fetchWorkOrders();
+  void fetchServiceRequests();
+
+  const interval = setInterval(() => {
+    void fetchWorkOrders();
+    void fetchServiceRequests();
+  }, 10000);
+
+  return () => {
+    clearInterval(interval);
+  };
+}, [user?.id, fetchWorkOrders, fetchServiceRequests]);
 
   const updateWorkOrderStatus = async (
     order: WorkOrder,

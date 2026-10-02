@@ -107,8 +107,16 @@ function DispatcherDashboard() {
   const user = userData ? JSON.parse(userData) : null;
 
   useEffect(() => {
-    loadData();
-  }, []);
+  void loadData();
+
+  const interval = setInterval(() => {
+    void loadData();
+  }, 10000);
+
+  return () => {
+    clearInterval(interval);
+  };
+}, []);
 
   const loadData = async () => {
     try {

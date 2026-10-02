@@ -36,8 +36,16 @@ function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadDashboardData();
-  }, []);
+  void loadDashboardData();
+
+  const interval = setInterval(() => {
+    void loadDashboardData();
+  }, 10000);
+
+  return () => {
+    clearInterval(interval);
+  };
+}, []);
 
   const loadDashboardData = async () => {
     try {

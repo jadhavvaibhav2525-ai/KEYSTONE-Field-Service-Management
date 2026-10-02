@@ -103,9 +103,16 @@ function ManagerDashboard() {
   };
 
   useEffect(() => {
-    loadData();
-  }, []);
+  void loadData();
 
+  const interval = setInterval(() => {
+    void loadData();
+  }, 10000);
+
+  return () => {
+    clearInterval(interval);
+  };
+}, []);
   // ==================================================
   // TECHNICIANS
   // ==================================================
@@ -177,8 +184,10 @@ function ManagerDashboard() {
   const totalOrders = workOrders.length;
 
   const pendingOrders = workOrders.filter(
-    (order) => order.status === "PENDING"
-  ).length;
+  (order) =>
+    order.status === "PENDING" ||
+    order.status === "NEW"
+).length;
 
   const assignedOrders = workOrders.filter(
     (order) => order.status === "ASSIGNED"

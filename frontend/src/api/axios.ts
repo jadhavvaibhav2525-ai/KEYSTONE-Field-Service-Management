@@ -1,20 +1,32 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8082",
+  baseURL: import.meta.env.VITE_API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Automatically attach JWT token to every API request
+// Attach JWT token only to protected API requests
 api.interceptors.request.use(
   (config) => {
+    const publicEndpoints = [
+      "/api/auth/login",
+      "/api/auth/register",
+      "/api/v1/auth/login",
+      "/api/v1/auth/register",
+    ];
 
-    const token = localStorage.getItem("token");
+    const isPublicEndpoint = publicEndpoints.some((endpoint) =>
+      config.url?.startsWith(endpoint)
+    );
 
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    if (!isPublicEndpoint) {
+      const token = localStorage.getItem("token");
+
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
 
     return config;
