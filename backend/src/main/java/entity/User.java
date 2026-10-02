@@ -1,7 +1,6 @@
-
 package com.keystone.backend.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.*;
 
@@ -19,7 +18,7 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(nullable = false)
     private String password;
 
@@ -27,7 +26,6 @@ public class User {
     @Column(nullable = false)
     private Role role;
 
-    // Customer phone number
     private String phone;
 
     public User() {
