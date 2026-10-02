@@ -2,6 +2,7 @@ package com.keystone.backend.config;
 
 import com.keystone.backend.security.JwtAuthenticationFilter;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -20,15 +21,21 @@ import java.util.List;
 @Configuration
 public class SecurityConfig {
 
+    @Value("${app.cors.allowed-origin:http://localhost:5173}")
+    private String frontendOrigin;
+
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(
+            JwtAuthenticationFilter jwtAuthenticationFilter) {
+
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
     // =========================
     // PASSWORD ENCODER
     // =========================
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -37,12 +44,12 @@ public class SecurityConfig {
     // =========================
     // SECURITY FILTER CHAIN
     // =========================
+
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http)
-            throws Exception {
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http) throws Exception {
 
         http
-
                 // =========================
                 // CORS
                 // =========================
@@ -73,12 +80,11 @@ public class SecurityConfig {
                         // PUBLIC ENDPOINTS
                         // =========================
 
-                        // Backend home / health check
                         .requestMatchers(
-        "/",
-        "/health",
-        "/api/v1/health"
-).permitAll()
+                                "/",
+                                "/health",
+                                "/api/v1/health"
+                        ).permitAll()
 
                         // Authentication endpoints
                         .requestMatchers(
@@ -481,12 +487,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
-        CorsConfiguration configuration = new CorsConfiguration();
+        CorsConfiguration configuration =
+                new CorsConfiguration();
 
         configuration.setAllowedOrigins(
-                List.of(
-                        "http://localhost:5173"
-                )
+                List.of(frontendOrigin)
         );
 
         configuration.setAllowedMethods(

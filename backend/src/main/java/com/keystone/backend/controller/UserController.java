@@ -11,7 +11,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "${app.cors.allowed-origin}")
 public class UserController {
 
     private final UserRepository userRepository;
@@ -25,13 +24,13 @@ public class UserController {
         this.passwordEncoder = passwordEncoder;
     }
 
-    // GET - Get all users
+    // Get all users
     @GetMapping
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
-    // POST - Create user
+    // Create new user
     @PostMapping
     public User createUser(@RequestBody User user) {
 
@@ -46,7 +45,7 @@ public class UserController {
         return userRepository.save(user);
     }
 
-    // PUT - Update user
+    // Update user details
     @PutMapping("/{id}")
     public User updateUser(
             @PathVariable Long id,
@@ -54,8 +53,7 @@ public class UserController {
 
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("User not found")
-                );
+                        new RuntimeException("User not found"));
 
         existingUser.setName(updatedUser.getName());
         existingUser.setEmail(updatedUser.getEmail());
@@ -65,7 +63,7 @@ public class UserController {
         return userRepository.save(existingUser);
     }
 
-    // PUT - Reset user password
+    // Reset user password
     @PutMapping("/{id}/password")
     public User resetPassword(
             @PathVariable Long id,
@@ -73,13 +71,14 @@ public class UserController {
 
         User user = userRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("User not found")
-                );
+                        new RuntimeException("User not found"));
 
         String newPassword = request.get("password");
 
         if (newPassword == null || newPassword.isBlank()) {
-            throw new RuntimeException("Password cannot be empty");
+            throw new RuntimeException(
+                    "Password cannot be empty"
+            );
         }
 
         user.setPassword(
@@ -89,7 +88,7 @@ public class UserController {
         return userRepository.save(user);
     }
 
-    // DELETE - Delete user
+    // Delete user
     @DeleteMapping("/{id}")
     public String deleteUser(@PathVariable Long id) {
 
