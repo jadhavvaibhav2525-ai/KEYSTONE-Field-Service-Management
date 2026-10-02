@@ -485,40 +485,43 @@ public class SecurityConfig {
     // =========================
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+public CorsConfigurationSource corsConfigurationSource() {
 
-        CorsConfiguration configuration =
-                new CorsConfiguration();
+    CorsConfiguration configuration =
+            new CorsConfiguration();
 
-        configuration.setAllowedOrigins(
-                List.of(frontendOrigin)
-        );
+    configuration.setAllowedOrigins(
+            List.of(
+                    "http://localhost:5173",
+                    "https://keystone-frontend-urjt.onrender.com"
+            )
+    );
 
-        configuration.setAllowedMethods(
-                List.of(
-                        "GET",
-                        "POST",
-                        "PUT",
-                        "DELETE",
-                        "PATCH",
-                        "OPTIONS"
-                )
-        );
+    configuration.setAllowedMethods(
+            List.of(
+                    "GET",
+                    "POST",
+                    "PUT",
+                    "DELETE",
+                    "PATCH",
+                    "OPTIONS"
+            )
+    );
 
-        configuration.setAllowedHeaders(
-                List.of("*")
-        );
+    configuration.setAllowedHeaders(
+            List.of("*")
+    );
 
-        configuration.setAllowCredentials(true);
+    configuration.setAllowCredentials(true);
 
-        UrlBasedCorsConfigurationSource source =
-                new UrlBasedCorsConfigurationSource();
+    UrlBasedCorsConfigurationSource source =
+            new UrlBasedCorsConfigurationSource();
 
-        source.registerCorsConfiguration(
-                "/**",
-                configuration
-        );
+    source.registerCorsConfiguration(
+            "/**",
+            configuration
+    );
 
-        return source;
-    }
+    return source;
+}
 }
