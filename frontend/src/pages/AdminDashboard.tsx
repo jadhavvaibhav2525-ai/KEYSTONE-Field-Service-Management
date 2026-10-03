@@ -12,7 +12,18 @@ interface User {
 
 interface WorkOrder {
   id: number;
+  title?: string;
   status: string;
+}
+
+interface ServiceReport {
+  id: number;
+  workOrderId?: number | null;
+  serviceRequestId?: number | null;
+  technicianId: number;
+  workPerformed?: string;
+  completedAt?: string | null;
+  createdAt?: string | null;
 }
 
 interface Facility {
@@ -31,6 +42,7 @@ function AdminDashboard() {
   const [workOrders, setWorkOrders] = useState<WorkOrder[]>([]);
   const [facilities, setFacilities] = useState<Facility[]>([]);
   const [equipment, setEquipment] = useState<Equipment[]>([]);
+  const [serviceReports, setServiceReports] = useState<ServiceReport[]>([]);
 
   const [loading, setLoading] = useState(true);
 
@@ -55,17 +67,26 @@ function AdminDashboard() {
         workOrdersResponse,
         facilitiesResponse,
         equipmentResponse,
+        serviceReportsResponse,
       ] = await Promise.all([
         api.get("/api/users"),
         api.get("/api/work-orders"),
         api.get("/api/facilities"),
         api.get("/api/equipment"),
+        api.get("/api/service-reports"),
       ]);
 
       setUsers(usersResponse.data);
       setWorkOrders(workOrdersResponse.data);
       setFacilities(facilitiesResponse.data);
       setEquipment(equipmentResponse.data);
+      setServiceReports(
+        Array.isArray(serviceReportsResponse.data)
+          ? serviceReportsResponse.data.filter(
+              (report: ServiceReport) => report.workOrderId != null
+            )
+          : []
+      );
     } catch (error) {
       console.error("Error loading admin dashboard:", error);
       alert("Unable to load admin dashboard data.");
@@ -226,6 +247,53 @@ function AdminDashboard() {
             <strong>{activeWorkOrders}</strong>
           </p>
         </div>
+      </section>
+
+      <section className="admin-dashboard__reports">
+        <div className="admin-dashboard__reports-heading">
+          <div>
+            <h3>Technician Service Reports</h3>
+            <p>{serviceReports.length} work-order reports submitted</p>
+          </div>
+        </div>
+
+        {serviceReports.length === 0 ? (
+          <p className="admin-dashboard__reports-empty">
+            No work-order service reports have been submitted yet.
+          </p>
+        ) : (
+          <div className="admin-dashboard__reports-list">
+            {serviceReports.map((report) => {
+              const workOrder = workOrders.find(
+                (order) => order.id === report.workOrderId
+              );
+              const completedDate = report.completedAt || report.createdAt;
+
+              return (
+                <article
+                  className="admin-dashboard__report"
+                  key={report.id}
+                >
+                  <div className="admin-dashboard__report-heading">
+                    <strong>
+                      {workOrder?.title || `Work Order #${report.workOrderId}`}
+                    </strong>
+                    <span>Report #{report.id}</span>
+                  </div>
+                  <p>{report.workPerformed || "No work details provided."}</p>
+                  <div className="admin-dashboard__report-meta">
+                    <span>Technician #{report.technicianId}</span>
+                    <span>
+                      {completedDate
+                        ? new Date(completedDate).toLocaleString()
+                        : "Completion date not recorded"}
+                    </span>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
       </section>
     </div>
   );

@@ -11,6 +11,7 @@ import com.keystone.backend.repository.UserRepository;
 import com.keystone.backend.service.WorkOrderService;
 
 import org.springframework.security.core.Authentication;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -101,6 +102,7 @@ public class ServiceReportController {
     // =========================================================
 
     @PostMapping
+        @Transactional
     public ServiceReport createReport(
             @RequestBody ServiceReport serviceReport,
             Authentication authentication) {
@@ -259,23 +261,16 @@ public class ServiceReportController {
             }
 
             // -------------------------------------------------
-            // Automatically set completion time
-            // -------------------------------------------------
-
-            if (workOrder.getStatus()
-                    == WorkOrderStatus.COMPLETED
-                    && serviceReport.getCompletedAt() == null) {
-
-                serviceReport.setCompletedAt(
-                        LocalDateTime.now());
-            }
-
             // -------------------------------------------------
             // Explicitly preserve Work Order ID
             // -------------------------------------------------
 
             serviceReport.setWorkOrderId(
                     workOrderId);
+
+            completeWorkOrderForReport(
+                    workOrder,
+                    serviceReport);
         }
 
         // =====================================================
@@ -301,6 +296,7 @@ public class ServiceReportController {
     // =========================================================
 
     @PutMapping("/{id}")
+        @Transactional
     public ServiceReport updateReport(
             @PathVariable Long id,
             @RequestBody ServiceReport updatedReport,
@@ -399,11 +395,39 @@ public class ServiceReportController {
 
             existingReport.setWorkOrderId(
                     existingReport.getWorkOrderId());
+
+            WorkOrder workOrder =
+                    workOrderService.getWorkOrderById(
+                            existingReport.getWorkOrderId());
+
+            completeWorkOrderForReport(
+                    workOrder,
+                    existingReport);
         }
 
         return serviceReportRepository.save(
                 existingReport);
     }
+
+        private void completeWorkOrderForReport(
+                        WorkOrder workOrder,
+                        ServiceReport serviceReport) {
+
+                if (workOrder.getStatus() != WorkOrderStatus.COMPLETED
+                                && workOrder.getStatus() != WorkOrderStatus.CANCELLED) {
+
+                        workOrderService.updateWorkOrderStatus(
+                                        workOrder.getId(),
+                                        WorkOrderStatus.COMPLETED);
+                }
+
+                if (workOrder.getStatus() != WorkOrderStatus.CANCELLED
+                                && serviceReport.getCompletedAt() == null) {
+
+                        serviceReport.setCompletedAt(
+                                        LocalDateTime.now());
+                }
+        }
 
     // =========================================================
     // DELETE SERVICE REPORT

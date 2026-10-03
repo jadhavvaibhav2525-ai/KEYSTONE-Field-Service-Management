@@ -390,6 +390,52 @@
   flex-wrap: wrap;
 }
 
+.manager-report-list {
+  display: grid;
+  gap: 12px;
+}
+
+.manager-report-card {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid #e8edf5;
+  border-radius: 10px;
+  background: #fbfcfe;
+}
+
+.manager-report-card-heading,
+.manager-report-card-heading > div,
+.manager-report-card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+}
+
+.manager-report-card-heading strong {
+  color: #26344c;
+  font-size: 13px;
+}
+
+.manager-report-card-heading span,
+.manager-report-card-meta {
+  color: #758198;
+  font-size: 11px;
+}
+
+.manager-report-card p {
+  margin: 12px 0;
+  color: #526078;
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.manager-report-card-meta {
+  justify-content: flex-start;
+}
+
 /* Status and priority badges */
 
 .manager-badge {

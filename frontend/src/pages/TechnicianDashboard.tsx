@@ -302,6 +302,12 @@ function TechnicianDashboard() {
       }
 
       await loadServiceReport(selectedWorkOrder.id);
+      await fetchWorkOrders();
+      setSelectedWorkOrder((current) =>
+        current?.id === selectedWorkOrder.id
+          ? { ...current, status: "COMPLETED" }
+          : current
+      );
       alert(serviceReport?.id ? "Service report updated." : "Service report saved.");
     } catch (err) {
       console.error("Error saving service report:", err);

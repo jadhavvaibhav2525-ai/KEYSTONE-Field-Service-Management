@@ -32,7 +32,8 @@ interface User {
 
 interface ServiceReport {
   id: number;
-  workOrderId: number;
+  workOrderId?: number | null;
+  serviceRequestId?: number | null;
   technicianId: number;
   workPerformed?: string;
   technicianRemarks?: string;
@@ -49,6 +50,7 @@ function ManagerDashboard() {
 
   const [workOrders, setWorkOrders] = useState<WorkOrder[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [serviceReports, setServiceReports] = useState<ServiceReport[]>([]);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -87,13 +89,21 @@ function ManagerDashboard() {
       setLoading(true);
       setError("");
 
-      const [workOrderResponse, userResponse] = await Promise.all([
+      const [workOrderResponse, userResponse, reportResponse] = await Promise.all([
         api.get("/api/work-orders"),
         api.get("/api/users"),
+        api.get("/api/service-reports"),
       ]);
 
       setWorkOrders(workOrderResponse.data);
       setUsers(userResponse.data);
+      setServiceReports(
+        Array.isArray(reportResponse.data)
+          ? reportResponse.data.filter(
+              (report: ServiceReport) => report.workOrderId != null
+            )
+          : []
+      );
     } catch (err) {
       console.error(err);
       setError("Failed to load dashboard data.");
@@ -677,6 +687,62 @@ function ManagerDashboard() {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+      </section>
+
+      <section className="manager-panel manager-reports-panel">
+        <div className="manager-panel-heading">
+          <div>
+            <h2>Technician Service Reports</h2>
+            <p>Reports submitted for work orders.</p>
+          </div>
+          <span className="manager-result-count">
+            {serviceReports.length} reports
+          </span>
+        </div>
+
+        {serviceReports.length === 0 ? (
+          <div className="manager-empty-state">
+            <h3>No work-order reports yet</h3>
+            <p>Submitted technician reports will appear here.</p>
+          </div>
+        ) : (
+          <div className="manager-report-list">
+            {serviceReports.map((report) => {
+              const workOrder = workOrders.find(
+                (order) => order.id === report.workOrderId
+              );
+
+              return (
+                <article className="manager-report-card" key={report.id}>
+                  <div className="manager-report-card-heading">
+                    <div>
+                      <strong>
+                        {workOrder?.title || `Work Order #${report.workOrderId}`}
+                      </strong>
+                      <span>Report #{report.id}</span>
+                    </div>
+                    <button
+                      className="manager-button manager-button-small manager-button-purple"
+                      onClick={() => {
+                        if (workOrder) void viewServiceReport(workOrder);
+                      }}
+                      disabled={!workOrder}
+                    >
+                      View Report
+                    </button>
+                  </div>
+                  <p>{report.workPerformed || "No work details provided."}</p>
+                  <div className="manager-report-card-meta">
+                    <span>{getTechnicianName(report.technicianId)}</span>
+                    <span>
+                      {formatDate(report.completedAt || report.createdAt)}
+                    </span>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         )}
       </section>
