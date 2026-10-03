@@ -233,6 +233,7 @@ const Users = () => {
 
   return (
     <div
+      className="users-page"
       style={{
         padding: "30px",
         background: "#f8fafc",
@@ -475,6 +476,7 @@ const Users = () => {
         )}
 
         <div
+          className="users-list-panel"
           style={{
             background: "white",
             padding: "20px",

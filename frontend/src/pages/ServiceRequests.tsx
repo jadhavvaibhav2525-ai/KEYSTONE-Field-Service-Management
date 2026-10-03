@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
+import "./ServiceRequests.css";
 
 interface User {
 id?: number;
@@ -527,7 +528,7 @@ equipment.length === 0 ||
 // UI
 // =========================================================
 
-return ( <div style={styles.page}>
+return ( <div className="service-requests-page" style={styles.page}>
 
 
   {/* =====================================================
@@ -593,13 +594,13 @@ return ( <div style={styles.page}>
       MAIN GRID
   ===================================================== */}
 
-  <div style={styles.grid}>
+  <div className="service-requests-grid" style={styles.grid}>
 
     {/* ===================================================
         CREATE SERVICE REQUEST
     =================================================== */}
 
-    <div style={styles.card}>
+    <div className="service-requests-card" style={styles.card}>
 
       <h2 style={styles.cardTitle}>
         Create Service Request
@@ -981,9 +982,9 @@ return ( <div style={styles.page}>
         MY SERVICE REQUESTS
     =================================================== */}
 
-    <div style={styles.card}>
+    <div className="service-requests-card" style={styles.card}>
 
-      <div style={styles.listHeader}>
+      <div className="service-requests-list-header" style={styles.listHeader}>
 
         <div>
 
@@ -1052,6 +1053,7 @@ return ( <div style={styles.page}>
             (request) => (
 
               <div
+                className="service-requests-request-card"
                 key={
                   request.id
                 }
@@ -1065,6 +1067,7 @@ return ( <div style={styles.page}>
                 ======================================= */}
 
                 <div
+                  className="service-requests-request-top"
                   style={
                     styles.requestTop
                   }
@@ -1164,6 +1167,7 @@ return ( <div style={styles.page}>
                 ======================================= */}
 
                 <div
+                  className="service-requests-details"
                   style={
                     styles.details
                   }

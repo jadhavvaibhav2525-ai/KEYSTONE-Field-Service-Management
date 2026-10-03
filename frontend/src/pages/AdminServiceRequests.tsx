@@ -455,7 +455,7 @@ function AdminServiceRequests() {
   // =========================================================
 
   return (
-    <div style={pageStyle}>
+    <div className="admin-service-requests" style={pageStyle}>
 
       {/* HEADER */}
 

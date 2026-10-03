@@ -315,7 +315,7 @@ function WorkOrders() {
   ).length;
 
   return (
-    <div>
+    <div className="work-orders-page">
       {/* Header */}
       <div
         style={{
@@ -354,6 +354,7 @@ function WorkOrders() {
 
       {/* Summary Cards */}
       <div
+        className="work-orders-summary-grid"
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(6, 1fr)",

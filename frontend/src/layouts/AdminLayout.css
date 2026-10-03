@@ -48,6 +48,7 @@
 
 .admin-main {
   flex: 1;
+  min-width: 0;
 }
 
 .admin-header {
@@ -71,6 +72,7 @@
 
 .admin-content {
   padding: 30px;
+  min-width: 0;
 }
 
 .dashboard-cards {
@@ -99,14 +101,47 @@
 }
 
 @media (max-width: 900px) {
+  .admin-sidebar {
+    width: 205px;
+    flex: 0 0 205px;
+  }
+
   .dashboard-cards {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 600px) {
+  .admin-layout {
+    flex-direction: column;
+  }
+
   .admin-sidebar {
-    width: 190px;
+    width: 100%;
+    flex: 0 0 auto;
+    padding: 12px 14px;
+  }
+
+  .admin-logo {
+    margin-bottom: 12px;
+  }
+
+  .admin-logo h2 {
+    font-size: 20px;
+  }
+
+  .admin-menu {
+    flex-direction: row;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+  }
+
+  .admin-menu a {
+    flex: 0 0 auto;
+    padding: 10px 12px;
+    white-space: nowrap;
   }
 
   .dashboard-cards {
@@ -114,10 +149,87 @@
   }
 
   .admin-header {
-    padding: 0 15px;
+    height: auto;
+    min-height: 64px;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 14px 15px;
+  }
+
+  .admin-header h1 {
+    font-size: 19px;
+  }
+
+  .admin-user {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .admin-user button {
+    margin-left: 0 !important;
   }
 
   .admin-content {
-    padding: 15px;
+    padding: 14px;
+  }
+
+  .admin-content > * {
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .admin-content input,
+  .admin-content select,
+  .admin-content textarea {
+    max-width: 100%;
+  }
+
+  .admin-content .work-orders-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .admin-content .users-page {
+    padding: 0 !important;
+  }
+
+  .users-page > div > div:first-child {
+    align-items: stretch !important;
+    flex-direction: column;
+  }
+
+  .users-page > div > div:first-child > button {
+    width: 100%;
+  }
+
+  .users-page .users-list-panel > div:first-child {
+    align-items: stretch !important;
+    flex-direction: column;
+  }
+
+  .users-page .users-list-panel input {
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  .admin-service-requests {
+    padding: 0 !important;
+  }
+
+  .admin-service-requests > div:last-child {
+    max-width: 100%;
+    padding: 12px !important;
+  }
+
+  .admin-service-requests h2 {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 360px) {
+  .admin-content .work-orders-summary-grid {
+    grid-template-columns: 1fr !important;
   }
 }
